@@ -16,9 +16,32 @@ abstract class Amortization implements AmortizationInterface
     ];
 
     abstract function calculateValues(Loan $loan): Loan;
-    abstract function calculatePMT(Loan $loan): float;
+
     abstract function calculateMainValue(Installment $installment): void;
     abstract function calculateTotalValue(Installment $installment, float $pmt): void;
-    abstract function calculateInterestValue(Installment $installment, float $debitBalance): void;
-    abstract function setDebitBalance(Installment $installment, float $previousDebitBalance): float;
+    abstract function calculateDebitBalance(Installment $installment, float $previousDebitBalance): float;
+
+
+
+    public function calculateInterestValue(Installment $installment, float $debitBalance): void
+    {
+        $interestValue = round($debitBalance * $installment->getLoan()->getInterest(), 2);
+
+        $installment->setInterestValue($interestValue);
+    }
+
+    public function calculatePMT(Loan $loan): float
+    {
+        $pv = $loan->getValue();
+        $i = $loan->getInterest();
+        $n = $loan->getPeriod();
+
+        $pmt = $pv * (
+            $i * pow(1 + $i, $n)
+        ) / (
+            pow(1 + $i, $n) - 1
+        );
+
+        return round($pmt, 2);
+    }
 }

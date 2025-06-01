@@ -17,11 +17,11 @@ class Sac extends Amortization
         foreach ($installments as $installment) {
             $installment->setLoan($loan);
 
-            $this->calculateTotalValue($installment, $pmt);
-            $this->calculateInterestValue($installment, $debitBalance);
             $this->calculateMainValue($installment);
+            $this->calculateInterestValue($installment, $debitBalance);
+            $this->calculateTotalValue($installment, $pmt);
 
-            $debitBalance = $this->setDebitBalance($installment, $debitBalance);
+            $debitBalance = $this->calculateDebitBalance($installment, $debitBalance);
         }
 
         $loan->setInstallments($installments);
@@ -31,14 +31,9 @@ class Sac extends Amortization
 
     public function calculateTotalValue(Installment $installment, float $pmt): void
     {
-        $installment->setTotalValue($pmt);
-    }
+        $totalValue = round($installment->getMainValue() + $installment->getInterestValue(), 2);
 
-    public function calculateInterestValue(Installment $installment, float $debitBalance): void
-    {
-        $interestValue = round($debitBalance * $installment->getLoan()->getInterest(), 2);
-
-        $installment->setInterestValue($interestValue);
+        $installment->setTotalValue($totalValue);
     }
 
     public function calculateMainValue(Installment $installment): void
@@ -48,7 +43,7 @@ class Sac extends Amortization
         $installment->setMainValue($mainValue);
     }
 
-    public function setDebitBalance(Installment $installment, float $previousDebitBalance): float
+    public function calculateDebitBalance(Installment $installment, float $previousDebitBalance): float
     {
         $newDebitBalance = round($previousDebitBalance - $installment->getMainValue(), 2);
 
@@ -59,20 +54,5 @@ class Sac extends Amortization
         $installment->setDebitBalance($newDebitBalance);
 
         return $newDebitBalance;
-    }
-
-    public function calculatePMT(Loan $loan): float
-    {
-        $pv = $loan->getValue();
-        $i = $loan->getInterest();
-        $n = $loan->getPeriod();
-
-        $pmt = $pv * (
-            $i * pow(1 + $i, $n)
-        ) / (
-            pow(1 + $i, $n) - 1
-        );
-
-        return round($pmt, 2);
     }
 }

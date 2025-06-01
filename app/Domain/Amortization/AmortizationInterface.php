@@ -17,5 +17,5 @@ interface AmortizationInterface
 
     public function calculateInterestValue(Installment $installment, float $debitBalance): void;
 
-    public function setDebitBalance(Installment $installment, float $previousDebitBalance): float;
+    public function calculateDebitBalance(Installment $installment, float $previousDebitBalance): float;
 }

@@ -21,7 +21,7 @@ class Price extends Amortization
             $this->calculateInterestValue($installment, $debitBalance);
             $this->calculateMainValue($installment);
 
-            $debitBalance = $this->setDebitBalance($installment, $debitBalance);
+            $debitBalance = $this->calculateDebitBalance($installment, $debitBalance);
         }
 
         $loan->setInstallments($installments);
@@ -34,13 +34,6 @@ class Price extends Amortization
         $installment->setTotalValue($pmt);
     }
 
-    public function calculateInterestValue(Installment $installment, float $debitBalance): void
-    {
-        $interestValue = round($debitBalance * $installment->getLoan()->getInterest(), 2);
-
-        $installment->setInterestValue($interestValue);
-    }
-
     public function calculateMainValue(Installment $installment): void
     {
         $mainValue = round($installment->getTotalValue() - $installment->getInterestValue(), 2);
@@ -48,7 +41,7 @@ class Price extends Amortization
         $installment->setMainValue($mainValue);
     }
 
-    public function setDebitBalance(Installment $installment, float $previousDebitBalance): float
+    public function calculateDebitBalance(Installment $installment, float $previousDebitBalance): float
     {
         $newDebitBalance = round($previousDebitBalance - $installment->getMainValue(), 2);
 
@@ -59,20 +52,5 @@ class Price extends Amortization
         $installment->setDebitBalance($newDebitBalance);
 
         return $newDebitBalance;
-    }
-
-    public function calculatePMT(Loan $loan): float
-    {
-        $pv = $loan->getValue();
-        $i = $loan->getInterest();
-        $n = $loan->getPeriod();
-
-        $pmt = $pv * (
-            $i * pow(1 + $i, $n)
-        ) / (
-            pow(1 + $i, $n) - 1
-        );
-
-        return round($pmt, 2);
     }
 }

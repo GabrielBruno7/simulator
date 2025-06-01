@@ -92,7 +92,8 @@ class Loan
             );
         }
 
-        $this->interest = $interest;
+        $this->interest = $interest / 100;
+
         return $this;
     }
 

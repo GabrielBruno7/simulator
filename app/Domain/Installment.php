@@ -111,10 +111,10 @@ class Installment
         foreach ($this->getInstallments() as $installment) {
             $installments[] = [
                 'numero' => $installment->getNumber(),
-                // 'valor_total' => $installment->getTotalValue(),
-                // 'valor_principal' => $installment->getMainValue(),
-                // 'valor_juros' => $installment->getInterestValue(),
-                // 'saldo_devedor' => $installment->getDebitBalance(),
+                'valor_total' => $installment->getTotalValue(),
+                'valor_principal' => $installment->getMainValue(),
+                'valor_juros' => $installment->getInterestValue(),
+                'saldo_devedor' => $installment->getDebitBalance(),
                 'data_vencimento' => $installment->getDueDate()->format('d/m/Y'),
             ];
         }

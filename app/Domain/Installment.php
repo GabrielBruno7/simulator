@@ -24,6 +24,7 @@ class Installment
     public function setNumber(int $number): self
     {
         $this->number = $number;
+
         return $this;
     }
 
@@ -35,6 +36,7 @@ class Installment
     public function setMainValue(float $mainValue): self
     {
         $this->mainValue = $mainValue;
+
         return $this;
     }
 
@@ -46,6 +48,7 @@ class Installment
     public function setDueDate(DateTime $dueDate): self
     {
         $this->dueDate = $dueDate;
+
         return $this;
     }
 
@@ -57,6 +60,7 @@ class Installment
     public function setTotalValue(float $totalValue): self
     {
         $this->totalValue = $totalValue;
+
         return $this;
     }
 
@@ -68,6 +72,7 @@ class Installment
     public function setDebitBalance(float $debitBalance): self
     {
         $this->debitBalance = $debitBalance;
+
         return $this;
     }
 
@@ -79,6 +84,7 @@ class Installment
     public function setInterestValue(float $interestValue): self
     {
         $this->interestValue = $interestValue;
+
         return $this;
     }
 
@@ -90,6 +96,7 @@ class Installment
     public function setInstallments(array $installments): self
     {
         $this->installments = $installments;
+
         return $this;
     }
 
@@ -101,6 +108,7 @@ class Installment
     public function setLoan(Loan $loan): self
     {
         $this->loan = $loan;
+
         return $this;
     }
 

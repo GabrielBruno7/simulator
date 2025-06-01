@@ -29,26 +29,26 @@ class Price extends Amortization
         return $loan;
     }
 
-    private function calculateTotalValue(Installment $installment, float $pmt): void
+    public function calculateTotalValue(Installment $installment, float $pmt): void
     {
         $installment->setTotalValue($pmt);
     }
 
-    private function calculateInterestValue(Installment $installment, float $debitBalance): void
+    public function calculateInterestValue(Installment $installment, float $debitBalance): void
     {
         $interestValue = round($debitBalance * $installment->getLoan()->getInterest(), 2);
 
         $installment->setInterestValue($interestValue);
     }
 
-    private function calculateMainValue(Installment $installment): void
+    public function calculateMainValue(Installment $installment): void
     {
         $mainValue = round($installment->getTotalValue() - $installment->getInterestValue(), 2);
 
         $installment->setMainValue($mainValue);
     }
 
-    private function setDebitBalance(Installment $installment, float $previousDebitBalance): float
+    public function setDebitBalance(Installment $installment, float $previousDebitBalance): float
     {
         $newDebitBalance = round($previousDebitBalance - $installment->getMainValue(), 2);
 
@@ -61,7 +61,7 @@ class Price extends Amortization
         return $newDebitBalance;
     }
 
-    private function calculatePMT(Loan $loan): float
+    public function calculatePMT(Loan $loan): float
     {
         $pv = $loan->getValue();
         $i = $loan->getInterest();

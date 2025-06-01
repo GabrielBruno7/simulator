@@ -2,48 +2,23 @@
 
 namespace App\Domain\Amortization;
 
+use App\Domain\Installment;
 use App\Domain\Loan;
 
-class Amortization implements AmortizationInterface
+abstract class Amortization implements AmortizationInterface
 {
-    private string $type;
+    public const AMORTIZATION_SAC = 'sac';
+    public const AMORTIZATION_PRICE = 'price';
 
-    private const AMORTIZATION_SAC = 'sac';
-    private const AMORTIZATION_PRICE = 'price';
-
-    private const ALLOWED_AMORTIZATION_TYPES = [
+    public const ALLOWED_AMORTIZATION_TYPES = [
         self::AMORTIZATION_SAC,
         self::AMORTIZATION_PRICE
     ];
 
-    public function setType(string $type): self
-    {
-        if (!in_array($type, self::ALLOWED_AMORTIZATION_TYPES)) {
-            throw new \InvalidArgumentException(
-                "O tipo de amortização '$type' é inválido."
-            );
-        }
-
-        $this->type = $type;
-
-        return $this;
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    public function make(): AmortizationInterface
-    {
-        return match($this->getType()) {
-            self::AMORTIZATION_SAC => new Sac(),
-            self::AMORTIZATION_PRICE => new Price(),
-        };
-    }
-
-    public function calculateValues(Loan $loan): Loan
-    {
-        return $loan;
-    }
+    abstract function calculateValues(Loan $loan): Loan;
+    abstract function calculatePMT(Loan $loan): float;
+    abstract function calculateMainValue(Installment $installment): void;
+    abstract function calculateTotalValue(Installment $installment, float $pmt): void;
+    abstract function calculateInterestValue(Installment $installment, float $debitBalance): void;
+    abstract function setDebitBalance(Installment $installment, float $previousDebitBalance): float;
 }

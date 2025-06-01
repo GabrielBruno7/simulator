@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Domain\Amortization\Amortization;
+use App\Domain\Amortization\AmortizationFactory;
 use App\Domain\Installment;
 use Illuminate\Http\Request;
 use App\Domain\Loan;
@@ -20,10 +20,7 @@ class LoanController extends Controller
                 'dia_pagamento' => 'required',
             ]);
 
-            $amortization = (new Amortization())
-                ->setType($request['amortizacao'])
-                ->make()
-            ;
+            $amortization = AmortizationFactory::make($request['amortizacao']);
 
             $loan = (new Loan())
                 ->setAmortization($amortization)

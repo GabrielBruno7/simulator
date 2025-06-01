@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resultado da Simulação</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #f9f9f9;
+      color: #333;
+    }
+    p {
+      font-size: 1.1rem;
+      margin: 0.5rem 0;
+    }
+    .btn-group {
+      margin-top: 1.5rem;
+    }
+    button {
+      font-size: 1rem;
+      padding: 0.6rem 1.2rem;
+      margin-right: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+    }
+    #btn-ver-tabela {
+      background-color: #3498db;
+      color: white;
+    }
+    #btn-simular-novamente {
+      background-color: #27ae60;
+      color: white;
+    }
+
+    #modalTabela {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      overflow: auto;
+    }
+    #modalTabelaContent {
+      background: white;
+      margin: 5% auto;
+      padding: 1rem;
+      max-width: 90%;
+      border-radius: 5px;
+    }
+    #modalTabela table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    #modalTabela th, #modalTabela td {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    #closeModal {
+      float: right;
+      cursor: pointer;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 Resultado da sua simulação:</h1>
+
+  <div id="resultado">Carregando...</div>
+
+  <div class="btn-group">
+    <button id="btn-ver-tabela">Ver tabela detalhada 📋</button>
+    <button id="btn-simular-novamente">Simular novamente 🔁</button>
+  </div>
+
+  <div id="modalTabela">
+    <div id="modalTabelaContent">
+      <span id="closeModal">&times;</span>
+      <h2>Tabela Detalhada das Parcelas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Valor Parcela (R$)</th>
+            <th>Amortização (R$)</th>
+            <th>Juros (R$)</th>
+            <th>Saldo Devedor (R$)</th>
+            <th>Vencimento</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function formatBRL(valor) {
+      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'Não informado';
+      const d = new Date(dateString);
+      if (isNaN(d)) return dateString;
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    const resultJSON = sessionStorage.getItem('simulationResult');
+
+    if (!resultJSON) {
+      document.getElementById('resultado').innerText = "Nenhum dado de simulação encontrado. Volte para simular.";
+    } else {
+      const data = JSON.parse(resultJSON);
+      const simulacao = data.simulacao;
+
+      const valor = simulacao.valor;
+      const prazo = simulacao.prazo;
+      const juros = simulacao.juros;
+      const parcelas = simulacao.parcelas;
+
+      const primeiraParcela = parcelas[0].valor_total;
+      const ultimaParcela = parcelas[parcelas.length - 1].valor_total;
+
+      const totalPago = parcelas.reduce((acc, p) => acc + p.valor_total, 0);
+
+      const primeiroVencimento = parcelas[0].vencimento || 'Não informado';
+
+      document.getElementById('resultado').innerHTML = `
+        <p>💰 Valor solicitado: ${formatBRL(valor)}</p>
+        <p>📆 Prazo: ${prazo} meses</p>
+        <p>📈 Juros mensais: ${juros.toFixed(2)}%</p>
+        <p>🔹 Primeira parcela: ${formatBRL(primeiraParcela)}</p>
+        <p>🔹 Última parcela: ${formatBRL(ultimaParcela)}</p>
+        <p>💸 Valor total pago: ${formatBRL(totalPago)}</p>
+        <p>📅 Primeiro vencimento: ${formatDate(primeiroVencimento)}</p>
+      `;
+
+      const btnTabela = document.getElementById('btn-ver-tabela');
+      const btnSimularNovamente = document.getElementById('btn-simular-novamente');
+      const modal = document.getElementById('modalTabela');
+      const closeModalBtn = document.getElementById('closeModal');
+      const tbody = document.querySelector('#modalTabela tbody');
+
+      btnTabela.addEventListener('click', () => {
+        tbody.innerHTML = '';
+        parcelas.forEach((parcela, index) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${parcela.numero || index + 1}</td>
+            <td>${formatBRL(parcela.valor_total)}</td>
+            <td>${formatBRL(parcela.valor_principal)}</td>
+            <td>${formatBRL(parcela.valor_juros)}</td>
+            <td>${formatBRL(parcela.saldo_devedor)}</td>
+            <td>${formatDate(parcela.vencimento)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        modal.style.display = 'block';
+      });
+
+      closeModalBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+
+      window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+
+      btnSimularNovamente.addEventListener('click', () => {
+        sessionStorage.removeItem('simulationResult');
+        window.location.href = 'loan-simulation.html';
+      });
+    }
+  </script>
+</body>
+</html>

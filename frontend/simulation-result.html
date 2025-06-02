@@ -4,184 +4,116 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Resultado da Simulação</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 1rem;
-      background: #f9f9f9;
-      color: #333;
-    }
-    p {
-      font-size: 1.1rem;
-      margin: 0.5rem 0;
-    }
-    .btn-group {
-      margin-top: 1.5rem;
-    }
-    button {
-      font-size: 1rem;
-      padding: 0.6rem 1.2rem;
-      margin-right: 1rem;
-      cursor: pointer;
-      border: none;
-      border-radius: 4px;
-    }
-    #btn-ver-tabela {
-      background-color: #3498db;
-      color: white;
-    }
-    #btn-simular-novamente {
-      background-color: #27ae60;
-      color: white;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    #modalTabela {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0; top: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
-      overflow: auto;
+    body {
+      font-family: 'Indie Flower', cursive;
     }
-    #modalTabelaContent {
-      background: white;
-      margin: 5% auto;
-      padding: 1rem;
-      max-width: 90%;
-      border-radius: 5px;
+
+    .title {
+      font-size: 3rem;
+      margin-bottom: 20px;
     }
-    #modalTabela table {
-      width: 100%;
+
+    table {
       border-collapse: collapse;
-      margin-top: 1rem;
+      width: 400px;
     }
-    #modalTabela th, #modalTabela td {
-      border: 1px solid #ccc;
-      padding: 0.5rem;
-      text-align: center;
-    }
-    #closeModal {
-      float: right;
-      cursor: pointer;
+
+    td {
       font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
+      padding: 8px 12px;
+      border-bottom: 1px solid #ffffff;
+    }
+
+    .container {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+
+    .mid-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
     }
   </style>
 </head>
 <body>
-  <h1>📊 Resultado da sua simulação:</h1>
-
-  <div id="resultado">Carregando...</div>
-
-  <div class="btn-group">
-    <button id="btn-ver-tabela">Ver tabela detalhada 📋</button>
-    <button id="btn-simular-novamente">Simular novamente 🔁</button>
-  </div>
-
-  <div id="modalTabela">
-    <div id="modalTabelaContent">
-      <span id="closeModal">&times;</span>
-      <h2>Tabela Detalhada das Parcelas</h2>
+  <div class="container">
+    <div class="mid-container">
+      <h1 class="title">Resultado</h1>
       <table>
-        <thead>
+        <tbody>
           <tr>
-            <th>#</th>
-            <th>Valor Parcela (R$)</th>
-            <th>Amortização (R$)</th>
-            <th>Juros (R$)</th>
-            <th>Saldo Devedor (R$)</th>
-            <th>Vencimento</th>
+            <td>Valor solicitado:</td>
+            <td id="valor-solicitado">--</td>
           </tr>
-        </thead>
-        <tbody></tbody>
+          <tr>
+            <td>Prazo:</td>
+            <td id="prazo">--</td>
+          </tr>
+          <tr>
+            <td>Juros mensais:</td>
+            <td id="juros">--</td>
+          </tr>
+          <tr>
+            <td>Primeira parcela:</td>
+            <td id="primeira-parcela">--</td>
+          </tr>
+          <tr>
+            <td>Última parcela:</td>
+            <td id="ultima-parcela"></td>
+          </tr>
+          <tr>
+            <td>Valor a pagar:</td>
+            <td id="valor-a-pagar">--</td>
+          </tr>
+          <tr>
+            <td>Primeiro vencimento:</td>
+            <td id="primeiro-vencimento">--</td>
+          </tr>
+        </tbody>
       </table>
     </div>
   </div>
 
   <script>
-    function formatBRL(valor) {
-      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const simulationResult = sessionStorage.getItem('simulationResult');
+      if (!simulationResult) {
+        alert('Nenhum resultado de simulação encontrado.');
+        return;
+      }
 
-    function formatDate(dateString) {
-      if (!dateString) return 'Não informado';
-      const d = new Date(dateString);
-      if (isNaN(d)) return dateString;
-      return d.toLocaleDateString('pt-BR');
-    }
-
-    const resultJSON = sessionStorage.getItem('simulationResult');
-
-    if (!resultJSON) {
-      document.getElementById('resultado').innerText = "Nenhum dado de simulação encontrado. Volte para simular.";
-    } else {
-      const data = JSON.parse(resultJSON);
+      const data = JSON.parse(simulationResult);
       const simulacao = data.simulacao;
 
-      const valor = simulacao.valor;
-      const prazo = simulacao.prazo;
-      const juros = simulacao.juros;
-      const parcelas = simulacao.parcelas;
+      document.getElementById('valor-solicitado').innerText = simulacao.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      document.getElementById('prazo').innerText = simulacao.prazo + ' meses';
+      document.getElementById('juros').innerText = (simulacao.juros * 100).toFixed(2) + ' %';
 
-      const primeiraParcela = parcelas[0].valor_total;
-      const ultimaParcela = parcelas[parcelas.length - 1].valor_total;
+      document.getElementById('primeira-parcela').innerText = simulacao.parcelas[0].valor_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      document.getElementById('primeiro-vencimento').innerText = simulacao.parcelas[0].data_vencimento;
 
-      const totalPago = parcelas.reduce((acc, p) => acc + p.valor_total, 0);
+      const lastIndex = simulacao.parcelas.length - 1;
+      document.getElementById('ultima-parcela').innerText = simulacao.parcelas[lastIndex].valor_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-      const primeiroVencimento = parcelas[0].vencimento || 'Não informado';
-
-      document.getElementById('resultado').innerHTML = `
-        <p>💰 Valor solicitado: ${formatBRL(valor)}</p>
-        <p>📆 Prazo: ${prazo} meses</p>
-        <p>📈 Juros mensais: ${juros.toFixed(2)}%</p>
-        <p>🔹 Primeira parcela: ${formatBRL(primeiraParcela)}</p>
-        <p>🔹 Última parcela: ${formatBRL(ultimaParcela)}</p>
-        <p>💸 Valor total pago: ${formatBRL(totalPago)}</p>
-        <p>📅 Primeiro vencimento: ${formatDate(primeiroVencimento)}</p>
-      `;
-
-      const btnTabela = document.getElementById('btn-ver-tabela');
-      const btnSimularNovamente = document.getElementById('btn-simular-novamente');
-      const modal = document.getElementById('modalTabela');
-      const closeModalBtn = document.getElementById('closeModal');
-      const tbody = document.querySelector('#modalTabela tbody');
-
-      btnTabela.addEventListener('click', () => {
-        tbody.innerHTML = '';
-        parcelas.forEach((parcela, index) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${parcela.numero || index + 1}</td>
-            <td>${formatBRL(parcela.valor_total)}</td>
-            <td>${formatBRL(parcela.valor_principal)}</td>
-            <td>${formatBRL(parcela.valor_juros)}</td>
-            <td>${formatBRL(parcela.saldo_devedor)}</td>
-            <td>${formatDate(parcela.vencimento)}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-        modal.style.display = 'block';
-      });
-
-      closeModalBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-      });
-
-      window.addEventListener('click', (event) => {
-        if (event.target === modal) {
-          modal.style.display = 'none';
-        }
-      });
-
-      btnSimularNovamente.addEventListener('click', () => {
-        sessionStorage.removeItem('simulationResult');
-        window.location.href = 'loan-simulation.html';
-      });
-    }
+      const valorTotalAPagar = simulacao.parcelas.reduce((acc, p) => acc + p.valor_total, 0);
+      document.getElementById('valor-a-pagar').innerText = valorTotalAPagar.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    });
   </script>
 </body>
 </html>

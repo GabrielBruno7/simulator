@@ -1,4 +1,4 @@
-start server php -S localhost:8000 -t public
-
+php -S localhost:8000 -t public
+npx serve .
 
 dump($this->response->getContent());

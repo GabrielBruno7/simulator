@@ -41,7 +41,8 @@ class LoanController extends Controller
                     'valor' => $loan->getValue(),
                     'prazo' => $loan->getPeriod(),
                     'juros' => $loan->getInterest(),
-                    'parcelas' => $installments
+                    'parcelas' => $installments,
+                    'amortizacao' => $request['amortizacao'],
                 ]
             ]);
         } catch (\InvalidArgumentException $e) {

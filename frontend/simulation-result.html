@@ -49,6 +49,71 @@
       justify-content: center;
       margin: 0 auto;
     }
+
+    .btn {
+      margin-top: 20px;
+      font-size: 18px;
+      padding: 10px 20px;
+      border: 2px solid #000;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 10px;
+      font-family: 'Indie Flower', cursive;
+    }
+
+    .btn:hover {
+      background: #1e1e1e;
+      color: white;
+    }
+
+    /* Modal */
+    #modalTabela {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 1000px;
+      overflow-x: auto;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 10px;
+    }
+
+    .close {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .modal-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .modal-table th, .modal-table td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .modal-table th {
+      background-color: #f0f0f0;
+    }
   </style>
 </head>
 <body>
@@ -57,40 +122,58 @@
       <h1 class="title">Resultado</h1>
       <table>
         <tbody>
+          <tr><td>Valor solicitado:</td><td id="valor-solicitado">--</td></tr>
+          <tr><td>Amortização:</td><td id="amortizacao">--</td></tr>
+          <tr><td>Prazo:</td><td id="prazo">--</td></tr>
+          <tr><td>Juros mensais:</td><td id="juros">--</td></tr>
+          <tr><td>Primeira parcela:</td><td id="primeira-parcela">--</td></tr>
+          <tr><td>Última parcela:</td><td id="ultima-parcela"></td></tr>
+          <tr><td>Valor a pagar:</td><td id="valor-a-pagar">--</td></tr>
+          <tr><td>Primeiro vencimento:</td><td id="primeiro-vencimento">--</td></tr>
+        </tbody>
+      </table>
+
+      <div>
+        <button class="btn" id="btn-ver-tabela">Detalhes</button>
+        <button class="btn" onclick="window.location.href='/frontend/'" id="btn-ver-tabela" >Simular novamente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalTabela">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h2>Tabela de Parcelas</h2>
+      <table class="modal-table">
+        <thead>
           <tr>
-            <td>Valor solicitado:</td>
-            <td id="valor-solicitado">--</td>
+            <th>#</th>
+            <th>Total</th>
+            <th>Principal</th>
+            <th>Juros</th>
+            <th>Saldo Devedor</th>
+            <th>Vencimento</th>
           </tr>
-          <tr>
-            <td>Prazo:</td>
-            <td id="prazo">--</td>
-          </tr>
-          <tr>
-            <td>Juros mensais:</td>
-            <td id="juros">--</td>
-          </tr>
-          <tr>
-            <td>Primeira parcela:</td>
-            <td id="primeira-parcela">--</td>
-          </tr>
-          <tr>
-            <td>Última parcela:</td>
-            <td id="ultima-parcela"></td>
-          </tr>
-          <tr>
-            <td>Valor a pagar:</td>
-            <td id="valor-a-pagar">--</td>
-          </tr>
-          <tr>
-            <td>Primeiro vencimento:</td>
-            <td id="primeiro-vencimento">--</td>
-          </tr>
+        </thead>
+        <tbody id="tabela-parcelas-body">
         </tbody>
       </table>
     </div>
   </div>
 
   <script>
+    function formatBRL(valor) {
+      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return 'Não informado';
+      const d = new Date(dateString);
+      if (isNaN(d)) return dateString;
+      return d.toLocaleDateString('pt-BR');
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const simulationResult = sessionStorage.getItem('simulationResult');
       if (!simulationResult) {
@@ -100,19 +183,50 @@
 
       const data = JSON.parse(simulationResult);
       const simulacao = data.simulacao;
+      const parcelas = simulacao.parcelas;
 
-      document.getElementById('valor-solicitado').innerText = simulacao.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      document.getElementById('valor-solicitado').innerText = formatBRL(simulacao.valor);
+      document.getElementById('amortizacao').innerText = formatBRL(simulacao.amortizacao);
       document.getElementById('prazo').innerText = simulacao.prazo + ' meses';
-      document.getElementById('juros').innerText = (simulacao.juros * 100).toFixed(2) + ' %';
+      document.getElementById('juros').innerText = simulacao.juros.toFixed(2) + ' %';
+      document.getElementById('primeira-parcela').innerText = formatBRL(parcelas[0].valor_total);
+      document.getElementById('primeiro-vencimento').innerText = formatDate(parcelas[0].data_vencimento);
+      document.getElementById('ultima-parcela').innerText = formatBRL(parcelas[parcelas.length - 1].valor_total);
 
-      document.getElementById('primeira-parcela').innerText = simulacao.parcelas[0].valor_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      document.getElementById('primeiro-vencimento').innerText = simulacao.parcelas[0].data_vencimento;
+      const valorTotalAPagar = parcelas.reduce((acc, p) => acc + p.valor_total, 0);
+      document.getElementById('valor-a-pagar').innerText = formatBRL(valorTotalAPagar);
 
-      const lastIndex = simulacao.parcelas.length - 1;
-      document.getElementById('ultima-parcela').innerText = simulacao.parcelas[lastIndex].valor_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      const modal = document.getElementById('modalTabela');
+      const btnTabela = document.getElementById('btn-ver-tabela');
+      const closeModalBtn = document.getElementById('closeModal');
+      const tbody = document.getElementById('tabela-parcelas-body');
 
-      const valorTotalAPagar = simulacao.parcelas.reduce((acc, p) => acc + p.valor_total, 0);
-      document.getElementById('valor-a-pagar').innerText = valorTotalAPagar.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      btnTabela.addEventListener('click', () => {
+        tbody.innerHTML = '';
+        parcelas.forEach((parcela, index) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${parcela.numero || index + 1}</td>
+            <td>${formatBRL(parcela.valor_total)}</td>
+            <td>${formatBRL(parcela.valor_principal)}</td>
+            <td>${formatBRL(parcela.valor_juros)}</td>
+            <td>${formatBRL(parcela.saldo_devedor)}</td>
+            <td>${formatDate(parcela.data_vencimento)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        modal.style.display = 'block';
+      });
+
+      closeModalBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+
+      window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
     });
   </script>
 </body>

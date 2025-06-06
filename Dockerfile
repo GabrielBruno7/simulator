@@ -16,6 +16,9 @@ WORKDIR /var/www/html
 
 COPY . .
 
+# Ajusta DocumentRoot para /var/www/html/public/frontend
+RUN sed -i 's|/var/www/html|/var/www/html/public/frontend|g' /etc/apache2/sites-available/000-default.conf
+
 RUN chown -R www-data:www-data /var/www/html \
     && a2enmod rewrite
 
@@ -27,7 +30,7 @@ RUN echo "Alias /frontend /var/www/html/frontend\n\
 </Directory>" > /etc/apache2/conf-available/frontend.conf \
     && a2enconf frontend
 
-RUN echo "<Directory /var/www/html/public>\n\
+RUN echo "<Directory /var/www/html/public/frontend>\n\
     AllowOverride All\n\
 </Directory>" >> /etc/apache2/apache2.conf
 

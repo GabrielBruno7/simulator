@@ -197,7 +197,7 @@
       const data = { valor, prazo, juros, amortizacao, dia_pagamento };
 
       try {
-        const res = await fetch("http://backend/simulate", {
+        const res = await fetch('https://backend-service-name.onrender.com/simulate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)

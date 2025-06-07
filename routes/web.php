@@ -18,3 +18,7 @@ $router->get('/', function () {
 });
 
 $router->post('/simulate', 'LoanController@actionSimulate');
+
+$router->options('/{any:.*}', function () {
+    return response('', 200);
+});
